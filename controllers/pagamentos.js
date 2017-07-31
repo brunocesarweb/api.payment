@@ -31,10 +31,11 @@ module.exports = function(app){
     pagamentoDao.salva(pagamento, function(erro, resultado){
       if (erro) {
         console.log("Erro ao inserir no banco: " + erro);
-        res.status(400).send(erro);
+        res.status(500).send(erro);
       }else{
         console.log("Pagamento criado");
-        res.json(pagamento);
+        res.location('/pagamentos/pagamento/' + resultado.insertId)
+        res.status(201).json(pagamento);
       }
     });
 
@@ -49,4 +50,12 @@ curl http://localhost:3001/pagamentos/pagamento -X POST -v -H "Content-type: app
 
 curl http://localhost:3001/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json | json_pp
 
+Existem diversos status code HTTP , conhecê-los e utilizá-los corretamente é extremamente importante para o bom desenho de uma api REST. Veja abaixo alguns dos principais códigos e seus significados:
+100 Continue: o servidor recebeu a solicitação e o cliente pode continuar a comunicação.
+200 Ok: tudo ocorreu como esperado.
+201 Created: um novo recurso foi criado no servidor.
+301 Moved: a url solicitada foi movida.
+400 Bad Request: problemas na requisição do cliente.
+404 Not Found: a url solicitada não foi encontrada.
+500 Internal Server Error: algo inesperado aconteceu do lado do servidor
 */
