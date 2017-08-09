@@ -12,14 +12,14 @@ https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 -------------------------------------------------------------------------------------------------------------------
 REQUISIÇÕES DAS APIs
 Requisições post
-curl http://localhost:3001/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json; echo
-curl http://localhost:3001/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json | json_pp
+curl http://localhost:3000/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json; echo
+curl http://localhost:3000/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json | json_pp
 
 Requisições put
-curl -X PUT http://localhost:3001/pagamentos/pagamento/10 -v
+curl -X PUT http://localhost:3000/pagamentos/pagamento/10 -v
 
 Requisições delete
-curl -X DELETE http://localhost:3001/pagamentos/pagamento/10 -v
+curl -X DELETE http://localhost:3000/pagamentos/pagamento/10 -v
 */
 
 module.exports = function(app){
@@ -81,9 +81,9 @@ module.exports = function(app){
   //Faz o post de pagamento no db
   app.post('/pagamentos/pagamento', function(req,res){
 
-    req.assert("forma_de_pagamento", "Forma de pagamento é obrigatória.").notEmpty();
-    req.assert("valor", "Valor é obrigatório e deve ser um decimal.").notEmpty().isFloat();
-    req.assert("moeda", "Moeda é obrigatória e deve ter 3 caracteres").notEmpty().len(3,3);
+    req.assert("pagamento.forma_de_pagamento", "Forma de pagamento é obrigatória.").notEmpty();
+    req.assert("pagamento.valor", "Valor é obrigatório e deve ser um decimal.").notEmpty().isFloat();
+    req.assert("pagamento.moeda", "Moeda é obrigatória e deve ter 3 caracteres").notEmpty().len(3,3);
 
     var errors = req.validationErrors();
 
@@ -94,7 +94,7 @@ module.exports = function(app){
     };
     console.log('processando pagamento...');
 
-    var pagamento = req.body;
+    var pagamento = req.body["pagamento"];
     console.log("processando uma requisicao de um novo pagamento");
 
     pagamento.status = 'CRIADO';
@@ -104,12 +104,26 @@ module.exports = function(app){
     var pagamentoDao = new app.persistencia.PagamentoDao(connection);
     //chamando médoto salva
     pagamentoDao.salva(pagamento, function(erro, resultado){
+
       if (erro) {
+
         console.log("Erro ao inserir no banco: " + erro);
         res.status(500).send(erro);
+
       }else{
+
         pagamento.id = resultado.insertId;
         console.log("Pagamento criado");
+
+        //Se caso a forma de pagamento for cartão iremos consumir os dados do cartão
+        if (pagamento.forma_de_pagamento === 'cartao') {
+          var cartao = req.body["cartao"];
+          console.log("cartao-> " + cartao);
+          clienteCartoes.autoriza(cartao);
+          res.status(201).json(cartao);
+          return;
+        }
+
         res.location('/pagamentos/pagamento/' + pagamento.id);
 
         var response = {
@@ -126,6 +140,7 @@ module.exports = function(app){
               method:"DELETE"
             }
           ]
+
         }
 
         res.status(201).json(response);
