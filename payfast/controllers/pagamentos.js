@@ -1,27 +1,3 @@
-/*
-Existem diversos status code HTTP , conhecê-los e utilizá-los corretamente é extremamente importante para o bom desenho de uma api REST. Veja abaixo alguns dos principais códigos e seus significados:
-100 Continue: o servidor recebeu a solicitação e o cliente pode continuar a comunicação.
-200 Ok: tudo ocorreu como esperado.
-201 Created: um novo recurso foi criado no servidor.
-301 Moved: a url solicitada foi movida.
-400 Bad Request: problemas na requisição do cliente.
-404 Not Found: a url solicitada não foi encontrada.
-500 Internal Server Error: algo inesperado aconteceu do lado do servidor
-Status code link:
-https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
--------------------------------------------------------------------------------------------------------------------
-REQUISIÇÕES DAS APIs
-Requisições post
-curl http://localhost:3000/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json; echo
-curl http://localhost:3000/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json | json_pp
-
-Requisições put
-curl -X PUT http://localhost:3000/pagamentos/pagamento/10 -v
-
-Requisições delete
-curl -X DELETE http://localhost:3000/pagamentos/pagamento/10 -v
-*/
-
 module.exports = function(app){
   app.get('/pagamentos', function(req, res){
     console.log("Recebida a requisição de teste");
@@ -116,37 +92,101 @@ module.exports = function(app){
         console.log("Pagamento criado");
 
         //Se caso a forma de pagamento for cartão iremos consumir os dados do cartão
-        if (pagamento.forma_de_pagamento === 'cartao') {
+        if (pagamento.forma_de_pagamento == 'cartao') {
+
           var cartao = req.body["cartao"];
-          console.log("cartao-> " + cartao);
-          clienteCartoes.autoriza(cartao);
-          res.status(201).json(cartao);
-          return;
-        }
+          //console.log("cartao--> " + cartao);
 
-        res.location('/pagamentos/pagamento/' + pagamento.id);
+          var clienteCartoes = new app.servicos.clienteCartoes();
 
-        var response = {
-          dados_de_pagamento: pagamento,
-          links: [
-            {
-              href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
-              rel:"confirmar",
-              method:"PUT"
-            },
-            {
-              href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
-              rel:"cancelar",
-              method:"DELETE"
+          clienteCartoes.autoriza(cartao,
+            function(exception, request, response, retorno){
+            if(exception){
+              console.log(exception);
+              //Response da requisição de criar pagamento
+              res.status(400).send(exception);
+              return;
             }
-          ]
 
+            console.log(retorno);
+
+            res.location('/pagamentos/pagamento/' + pagamento.id);
+
+            var response = {
+              dados_de_pagamento: pagamento,
+              cartao: retorno,
+              links: [
+                {
+                  href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
+                  rel:"confirmar",
+                  method:"PUT"
+                },
+                {
+                  href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
+                  rel:"cancelar",
+                  method:"DELETE"
+                }
+              ]
+            }
+
+            //console.log("retorno-> " + retorno);
+            res.status(201).json(response);
+            return;
+
+          });
+
+        }else{
+
+          res.location('/pagamentos/pagamento/' + pagamento.id);
+
+          var response = {
+            dados_de_pagamento: pagamento,
+            links: [
+              {
+                href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
+                rel:"confirmar",
+                method:"PUT"
+              },
+              {
+                href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
+                rel:"cancelar",
+                method:"DELETE"
+              }
+            ]
+          }
         }
 
         res.status(201).json(response);
+
       }
+
     });
 
   });
 
 }
+
+
+/*
+Existem diversos status code HTTP , conhecê-los e utilizá-los corretamente é extremamente importante para o bom desenho de uma api REST. Veja abaixo alguns dos principais códigos e seus significados:
+100 Continue: o servidor recebeu a solicitação e o cliente pode continuar a comunicação.
+200 Ok: tudo ocorreu como esperado.
+201 Created: um novo recurso foi criado no servidor.
+301 Moved: a url solicitada foi movida.
+400 Bad Request: problemas na requisição do cliente.
+404 Not Found: a url solicitada não foi encontrada.
+500 Internal Server Error: algo inesperado aconteceu do lado do servidor
+Status code link:
+https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+-------------------------------------------------------------------------------------------------------------------
+REQUISIÇÕES DAS APIs
+Requisições post
+curl http://localhost:3000/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json; echo
+curl http://localhost:3000/pagamentos/pagamento -X POST -v -H "Content-type: application/json" -d @files/pagamento.json | json_pp
+
+Requisições put
+curl -X PUT http://localhost:3000/pagamentos/pagamento/10 -v
+
+Requisições delete
+curl -X DELETE http://localhost:3000/pagamentos/pagamento/10 -v
+*/
