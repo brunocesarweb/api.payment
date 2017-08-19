@@ -8,19 +8,33 @@ module.exports = function(app){
     var id = req.params.id;
     console.log('consultando pagamento: ' + id);
 
-    var connection = app.persistencia.connectionFactory();
-    var pagamentoDao = new app.persistencia.PagamentoDao(connection);
+    var memcachedClient = app.servicos.memcachedClient();
 
-    pagamentoDao.buscaPorId(id, function(erro, resultado){
-      if (erro) {
-        console.log('Erro ao consultar no banco: ' + erro);
-        res.status(500).send(erro);
+    memcachedClient.get('pagamento-' + id, function(erro, retorno){
+      if (erro || !retorno) {
+        console.log('MISS - chave não encontrada');
+
+        var connection = app.persistencia.connectionFactory();
+        var pagamentoDao = new app.persistencia.PagamentoDao(connection);
+
+        pagamentoDao.buscaPorId(id, function(erro, resultado){
+          if (erro) {
+            console.log('Erro ao consultar no banco: ' + erro);
+            res.status(500).send(erro);
+            return;
+          }
+          console.log(resultado);
+          console.log('Pagamento encontrado: ' + JSON.stringify(resultado));
+          res.json(resultado);
+          return;
+        });
+
+      }else{
+        //HIT no cache
+        console.log('HIT - valor: ' + JSON.stringify(retorno));
+        res.json(retorno);
         return;
       }
-      console.log(resultado);
-      console.log('Pagamento encontrado: ' + JSON.stringify(resultado));
-      res.json(resultado);
-      return;
     });
 
   });
@@ -111,6 +125,12 @@ module.exports = function(app){
 
         pagamento.id = resultado.insertId;
         console.log("Pagamento criado");
+
+        var memcachedClient = app.servicos.memcachedClient();
+
+        memcachedClient.set('pagamento-' + pagamento.id, pagamento, 60000, function(erro){
+          console.log('Nova chave adicionada ao cache: pagamento-' + pagamento.id);
+        });
 
         //Se caso a forma de pagamento for cartão iremos consumir os dados do cartão
         if (pagamento.forma_de_pagamento == 'cartao') {
