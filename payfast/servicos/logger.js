@@ -1,6 +1,11 @@
 var winston = require('winston');
+var fs = require("fs");
 
-var logger = new winston.Logger({
+if (!fs.existsSync('logs')) {
+  fs.mkdirSync('logs');
+}
+
+module.exports = new winston.Logger({
   transports: [
     new winston.transports.File({
       level: "info",
@@ -12,6 +17,6 @@ var logger = new winston.Logger({
   ]
 });
 
-logger.log('Log utilizando o winston');
-logger.log('info','Log utilizando winston e info');
-logger.info('Log mais maroto');
+// logger.log('Log utilizando o winston');
+// logger.log('info','Log utilizando winston e info');
+// logger.info('Log mais maroto');
