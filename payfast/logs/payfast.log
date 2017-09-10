@@ -1,2 +1,13 @@
-{"level":"info","message":"Log utilizando winston e info","timestamp":"2017-08-22T01:29:12.459Z"}
-{"level":"info","message":"Log mais maroto","timestamp":"2017-08-22T01:29:12.461Z"}
+{"level":"info","message":"consultando pagamento: 10","timestamp":"2017-08-22T13:35:31.999Z"}
+{"level":"info","message":"consultando pagamento: 10","timestamp":"2017-08-22T13:36:46.068Z"}
+{"level":"info","message":"::1 - - [22/Aug/2017:13:38:46 +0000] \"GET /pagamentos/pagamento/10 HTTP/1.1\" - -\n","timestamp":"2017-08-22T13:38:46.089Z"}
+{"level":"info","message":"consultando pagamento: 10","timestamp":"2017-08-22T13:38:46.111Z"}
+{"level":"info","message":"::1 - - [22/Aug/2017:13:40:46 +0000] \"GET /pagamentos/pagamento/10 HTTP/1.1\" - -\n","timestamp":"2017-08-22T13:40:46.118Z"}
+{"level":"info","message":"consultando pagamento: 10","timestamp":"2017-08-22T14:11:03.626Z"}
+{"level":"info","message":"::1 - - [22/Aug/2017:14:13:03 +0000] \"GET /pagamentos/pagamento/10 HTTP/1.1\" - -\n","timestamp":"2017-08-22T14:13:03.650Z"}
+{"level":"info","message":"consultando pagamento: 10","timestamp":"2017-08-22T14:13:03.666Z"}
+{"level":"info","message":"::1 - - [22/Aug/2017:14:15:03 +0000] \"GET /pagamentos/pagamento/10 HTTP/1.1\" - -\n","timestamp":"2017-08-22T14:15:03.686Z"}
+{"level":"info","message":"consultando pagamento: 10","timestamp":"2017-08-22T14:28:37.909Z"}
+{"level":"info","message":"::1 - - [22/Aug/2017:14:30:37 +0000] \"GET /pagamentos/pagamento/10 HTTP/1.1\" - -\n","timestamp":"2017-08-22T14:30:37.913Z"}
+{"level":"info","message":"consultando pagamento: 10","timestamp":"2017-08-22T14:30:37.937Z"}
+{"level":"info","message":"::1 - - [22/Aug/2017:14:32:37 +0000] \"GET /pagamentos/pagamento/10 HTTP/1.1\" - -\n","timestamp":"2017-08-22T14:32:37.943Z"}
